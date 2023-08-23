@@ -22,8 +22,12 @@ public class BeanLifeCycle3 {
 
         String value;
 
+        static {
+            log.info( "static block");
+        }
+
         public A() {
-            log.info( "instantiated");
+            log.info( "instantiating");
         }
 
         public String getValue() {

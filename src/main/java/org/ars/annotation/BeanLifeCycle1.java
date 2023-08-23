@@ -1,6 +1,5 @@
 package org.ars.annotation;
 
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -30,9 +29,15 @@ public class BeanLifeCycle1 {
 
         @Autowired
         B b;
+        
+        B b1;
+
+        static {
+            log.info( "static block");
+        }
 
         A() {
-            log.info( "instantiated");
+            log.info( "instantiating");
         }
 
         String getValue() {
@@ -43,6 +48,17 @@ public class BeanLifeCycle1 {
         void setValue( String value) {
             log.info( "setValue");
             this.value = value;
+        }
+
+        public B getB1() {
+            log.info( "getB1");
+            return b1;
+        }
+
+        @Autowired
+        public void setB1( B b1) {
+            log.info( "setB1");
+            this.b1 = b1;
         }
 
         @PostConstruct
@@ -57,8 +73,12 @@ public class BeanLifeCycle1 {
     }
 
     static class B {
+        static {
+            log.info( "static block");
+        }
+
         B() {
-            log.info( "instantiated");
+            log.info( "instantiating");
         }
 
         void init() {
