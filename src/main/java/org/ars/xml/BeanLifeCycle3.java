@@ -23,11 +23,11 @@ public class BeanLifeCycle3 {
         String value;
 
         static {
-            log.info( "static block");
+            log.info( "instantiation");
         }
 
         public A() {
-            log.info( "instantiating");
+            log.info( "initialization");
         }
 
         public String getValue() {

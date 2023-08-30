@@ -17,8 +17,12 @@ public class BeanLifeCycle1 {
 
         String value;
 
+        static {
+            log.info( "instantiation");
+        }
+
         public Bean() {
-            log.info( "instantiated");
+            log.info( "initialization");
         }
 
         void init() {
@@ -49,8 +53,6 @@ public class BeanLifeCycle1 {
             log.info( "main:start");
 
             context = new ClassPathXmlApplicationContext( "beanLifeCycle1.xml");
-
-            // Bean bean = (Bean) context.getBean( "bean");
 
         } catch( Exception e) {
             log.error( e.getMessage(), e);

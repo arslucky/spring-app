@@ -29,15 +29,15 @@ public class BeanLifeCycle1 {
 
         @Autowired
         B b;
-        
+
         B b1;
 
         static {
-            log.info( "static block");
+            log.info( "instantiation");
         }
 
         A() {
-            log.info( "instantiating");
+            log.info( "initialization");
         }
 
         String getValue() {
@@ -74,11 +74,11 @@ public class BeanLifeCycle1 {
 
     static class B {
         static {
-            log.info( "static block");
+            log.info( "instantiation");
         }
 
         B() {
-            log.info( "instantiating");
+            log.info( "initialization");
         }
 
         void init() {

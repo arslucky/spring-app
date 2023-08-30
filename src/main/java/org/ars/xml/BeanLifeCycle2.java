@@ -19,8 +19,12 @@ public class BeanLifeCycle2 {
 
         String value;
 
+        static {
+            log.info( "instantiation");
+        }
+
         public Bean() {
-            log.info( "instantiated");
+            log.info( "initialization");
         }
 
         public String getValue() {
