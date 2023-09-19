@@ -1,32 +1,28 @@
-package org.ars.annotation;
+package org.ars.xml;
 
 import javax.sql.DataSource;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author arsen.ibragimov
- *
- * 1 - not saved
- * 2 - not saved
- * 3 - saved
- * 4 - not saved
+ * Non roll back declarative transaction for especially exception
  */
-public class Transactional2 {
-    static Logger log = LogManager.getLogger( Transactional2.class);
+public class NonRollback1 {
+    static Logger log = LogManager.getLogger( NonRollback1.class);
+
+    static {
+        Configurator.setRootLevel( Level.DEBUG);
+    }
 
     static class Account {
         long id;
         String accountNumber;
-
-        public Account( String accountNumber) {
-            super();
-            this.accountNumber = accountNumber;
-        }
 
         public long getId() {
             return id;
@@ -45,6 +41,7 @@ public class Transactional2 {
         }
     }
 
+    /**********************************************/
     static interface AccountDAO {
         void create( Account account);
     }
@@ -65,13 +62,12 @@ public class Transactional2 {
         }
     }
 
-    static interface AccountManager {
-        void createAccount1( Account account1, Account account2);
-
-        void createAccount2( Account account3, Account account4);
+    /**********************************************/
+    public static interface AccountManager {
+        void createAccount( Account account) throws CheckedException;
     }
 
-    static class AccountManagerImpl implements AccountManager {
+    public static class AccountManagerImpl implements AccountManager {
 
         AccountDAO accountDAO;
 
@@ -80,47 +76,34 @@ public class Transactional2 {
         }
 
         @Override
-        @Transactional
-        public void createAccount1( Account account1, Account account2) {
-            accountDAO.create( account1);
+        public void createAccount( Account account) throws CheckedException {
+            accountDAO.create( account);
             if( true) {
-                throw new RuntimeException( "test");
+                throw new CheckedException( "test");
             }
-            accountDAO.create( account2);
-        }
-
-        @Override
-        public void createAccount2( Account account3, Account account4) {
-            this.createAccount1( account3, account4);
         }
     }
+    /**********************************************/
+    public static class CheckedException extends Exception {
 
+        private static final long serialVersionUID = 3780114280358252271L;
+
+        public CheckedException( String message) {
+            super( message);
+        }
+    }
+    /**********************************************/
     public static void main( String[] args) {
 
         ClassPathXmlApplicationContext ctx = null;
         try {
             log.info( "main:start");
 
-            ctx = new ClassPathXmlApplicationContext( "transactional2.xml");
+            ctx = new ClassPathXmlApplicationContext( "NonRollback1.xml");
             AccountManager accountManager = ctx.getBean( "accountManager", AccountManager.class);
-            Account account1 = new Account( "1");
-            Account account2 = new Account( "2");
-
-            try {
-                accountManager.createAccount1( account1, account2);
-            } catch( Exception e) {
-                log.error( e.getMessage(), e);
-            }
-
-            Account account3 = new Account( "3");
-            Account account4 = new Account( "4");
-
-            try {
-                accountManager.createAccount2( account3, account4);
-            } catch( Exception e) {
-                log.error( e.getMessage(), e);
-            }
-
+            Account account = new Account();
+            account.setAccountNumber( String.valueOf( (int) (10000 * Math.random())));
+            accountManager.createAccount( account);
         } catch( Exception e) {
             log.error( e.getMessage(), e);
         } finally {

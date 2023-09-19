@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+                http://www.springframework.org/schema/beans  
+                http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+                http://www.springframework.org/schema/context
+                http://www.springframework.org/schema/context/spring-context.xsd
+                http://www.springframework.org/schema/tx
+                https://www.springframework.org/schema/tx/spring-tx.xsd
+                http://www.springframework.org/schema/aop
+                https://www.springframework.org/schema/aop/spring-aop.xsd">   
+    
+
+    <!-- MySQL DB DataSource -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3307/customer"/>
+        <property name="username" value="userDev"/>
+        <property name="password" value="password"/>
+    </bean>
+
+    <!-- Creating TransactionManager Bean, since JDBC we are creating of type DataSourceTransactionManager -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- the transactional advice (what 'happens'; see the <aop:advisor/> bean below) -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*" isolation="DEFAULT" propagation="REQUIRED" rollback-for="CheckedException" />
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- ensure that the above transactional advice runs for any execution of an operation defined by the AccountManager interface -->
+    <aop:config>
+        <aop:pointcut id="accountManagerPointcut" expression="execution(* org.ars.xml.RollbackChecked1.AccountManager.*(..))" />
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="accountManagerPointcut"/>
+    </aop:config>
+
+    <bean id="accountDAO" class="org.ars.xml.RollbackChecked1.AccountDAOImpl">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <!-- this is the service object that we want to make transactional -->
+    <bean id="accountManager" class="org.ars.xml.RollbackChecked1.AccountManagerImpl">
+        <property name="accountDAO" ref="accountDAO"/>
+    </bean>
+</beans>  
