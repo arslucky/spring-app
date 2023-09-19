@@ -1,19 +1,25 @@
-package org.ars.annotation;
+package org.ars.xml;
 
 import javax.sql.DataSource;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author arsen.ibragimov
- * use @Transactional annotation
+ * Declarative transaction
  */
-public class Transactional1 {
-    static Logger log = LogManager.getLogger( Transactional1.class);
+public class TransactionDeclarative1 {
+    static Logger log = LogManager.getLogger( TransactionDeclarative1.class);
+
+    static {
+        Configurator.setRootLevel( Level.DEBUG);
+        // Configurator.setLevel( "org.apache.kafka.clients.consumer", Level.WARN);
+    }
 
     static class Account {
         long id;
@@ -36,6 +42,7 @@ public class Transactional1 {
         }
     }
 
+    /**********************************************/
     static interface AccountDAO {
         void create( Account account);
     }
@@ -56,11 +63,12 @@ public class Transactional1 {
         }
     }
 
-    static interface AccountManager {
+    /**********************************************/
+    public static interface AccountManager {
         void createAccount( Account account);
     }
 
-    static class AccountManagerImpl implements AccountManager {
+    public static class AccountManagerImpl implements AccountManager {
 
         AccountDAO accountDAO;
 
@@ -69,11 +77,9 @@ public class Transactional1 {
         }
 
         @Override
-        @Transactional
         public void createAccount( Account account) {
             accountDAO.create( account);
         }
-
     }
 
     public static void main( String[] args) {
@@ -82,10 +88,10 @@ public class Transactional1 {
         try {
             log.info( "main:start");
 
-            ctx = new ClassPathXmlApplicationContext( "transactional1.xml");
+            ctx = new ClassPathXmlApplicationContext( "transactionDeclarative1.xml");
             AccountManager accountManager = ctx.getBean( "accountManager", AccountManager.class);
             Account account = new Account();
-            account.setAccountNumber( "123456");
+            account.setAccountNumber( "987654");
             accountManager.createAccount( account);
         } catch( Exception e) {
             log.error( e.getMessage(), e);
